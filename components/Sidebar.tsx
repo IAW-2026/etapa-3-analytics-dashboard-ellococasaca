@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { UserButton } from "@clerk/nextjs";
 import {
   LayoutDashboard,
   ShoppingCart,
@@ -84,7 +85,8 @@ export default function Sidebar() {
         </div>
       </nav>
 
-      <div className="px-3 pt-6">
+      <div className="flex items-center gap-3 px-3 pt-6">
+        <UserButton />
         <p className="text-xs text-slate-500">IAW-2026 - Etapa 3</p>
       </div>
     </aside>

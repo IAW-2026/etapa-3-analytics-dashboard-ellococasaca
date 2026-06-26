@@ -1,3 +1,5 @@
+import { auth } from "@clerk/nextjs/server";
+
 const FEEDBACK_APP_URL = process.env.FEEDBACK_APP_URL;
 
 type RawAnalytics = {
@@ -78,8 +80,12 @@ export async function getFeedbackMetrics(): Promise<FeedbackMetrics> {
     throw new Error("Falta la variable de entorno FEEDBACK_APP_URL");
   }
 
+  const { getToken } = await auth();
+  const token = await getToken();
+
   const res = await fetch(`${FEEDBACK_APP_URL}/api/analytics`, {
-    next: { revalidate: 30 },
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    cache: "no-store",
   });
   if (!res.ok) {
     throw new Error(`La API de Feedback respondió ${res.status}`);
