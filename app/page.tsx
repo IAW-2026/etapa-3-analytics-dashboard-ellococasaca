@@ -12,7 +12,7 @@ const sections = [
   { href: "/buyer", label: "Buyer", desc: "Compradores y pedidos", icon: ShoppingCart, live: false },
   { href: "/seller", label: "Seller", desc: "Vendedores y catálogo", icon: Store, live: false },
   { href: "/payments", label: "Payments", desc: "Pagos y payouts", icon: CreditCard, live: false },
-  { href: "/feedback", label: "Feedback", desc: "Reseñas y calificaciones", icon: MessageSquare, live: false },
+  { href: "/feedback", label: "Feedback", desc: "Reseñas y calificaciones", icon: MessageSquare, live: true },
 ];
 
 export default function DashboardPage() {
