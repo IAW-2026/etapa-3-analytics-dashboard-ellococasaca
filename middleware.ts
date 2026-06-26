@@ -9,19 +9,12 @@ const isPublicRoute = createRouteMatcher([
 export default clerkMiddleware(async (auth, req) => {
   if (isPublicRoute(req)) return;
 
-  const { userId, sessionClaims } = await auth();
+  const { userId } = await auth();
 
   if (!userId) {
     const signInUrl = new URL("/sign-in", req.url);
     signInUrl.searchParams.set("redirect_url", req.url);
     return NextResponse.redirect(signInUrl);
-  }
-
-  const meta = (sessionClaims?.publicMetadata ?? {}) as { roles?: string[] };
-  const roles = meta.roles ?? [];
-
-  if (!roles.includes("admin")) {
-    return NextResponse.redirect(new URL("/unauthorized", req.url));
   }
 });
 
