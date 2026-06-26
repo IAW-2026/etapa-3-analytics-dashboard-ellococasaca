@@ -19,10 +19,10 @@ export const STATUS_LABELS: Record<PaymentStatus, string> = {
 };
 
 export const STATUS_COLORS: Record<PaymentStatus, string> = {
-  pendiente: "#94a3b8", // Slate
-  aprobado: "#22c55e",  // Green (like DELIVERED)
-  pagado: "#3b82f6",     // Blue (like IN_TRANSIT)
-  rechazado: "#ef4444", // Red (like CANCELED)
+  pendiente: "#94a3b8",
+  aprobado: "#22c55e",
+  pagado: "#3b82f6",
+  rechazado: "#ef4444",
 };
 
 export const STATUS_BADGE: Record<PaymentStatus, string> = {
@@ -39,21 +39,27 @@ export type StatusDatum = {
   color: string;
 };
 
+export type PaymentTypeDatum = {
+  name: string;
+  value: number;
+  color: string;
+};
+
 interface RawCharge {
   id: string;
-  amount: string; // From Prisma Decimal type
+  amount: string;
   status: PaymentStatus;
   created_at: string;
   buyer_id: string;
   product_id?: string | null;
   shipping_status?: string | null;
-  metadata?: unknown; // Assuming Json can be anything
+  metadata?: unknown;
   charge_id_ref?: string | null;
 }
 
 interface RawPayout {
   id: string;
-  amount: string; // From Prisma Decimal type
+  amount: string;
   status: PaymentStatus;
   created_at: string;
   seller_id: string;
@@ -85,8 +91,14 @@ export type PaymentMetrics = {
   totalCharges: number;
   totalPayouts: number;
   totalTransactions: number;
+  totalChargeAmount: number;
+  totalPayoutAmount: number;
+  totalProcessedAmount: number;
+  avgChargeAmount: number;
+  avgPayoutAmount: number;
   kpis: { aprobado: number; pagado: number; rechazado: number; pendiente: number };
   byStatus: StatusDatum[];
+  typeBreakdown: PaymentTypeDatum[];
   recentCharges: ProcessedCharge[];
   recentPayouts: ProcessedPayout[];
 };
@@ -127,15 +139,12 @@ export async function getPaymentMetrics(): Promise<PaymentMetrics> {
   for (const status of STATUS_ORDER) counts[status] = 0;
 
   for (const t of allTransactions) {
-      if (t.type === 'charge') {
-          counts[t.status as PaymentStatus] = (counts[t.status as PaymentStatus] ?? 0) + 1;
-      } else if (t.type === 'payout') {
-          const status = t.status === 'pagado' ? 'pagado' : t.status;
-          counts[status as PaymentStatus] = (counts[status as PaymentStatus] ?? 0) + 1;
-      }
+    counts[t.status as PaymentStatus] = (counts[t.status as PaymentStatus] ?? 0) + 1;
   }
 
-
+  const totalChargeAmount = charges.reduce((sum, charge) => sum + charge.amount, 0);
+  const totalPayoutAmount = payouts.reduce((sum, payout) => sum + payout.amount, 0);
+  const totalProcessedAmount = totalChargeAmount + totalPayoutAmount;
 
   const byStatus: StatusDatum[] = STATUS_ORDER.map((status) => ({
     status,
@@ -144,10 +153,20 @@ export async function getPaymentMetrics(): Promise<PaymentMetrics> {
     color: STATUS_COLORS[status],
   }));
 
+  const typeBreakdown: PaymentTypeDatum[] = [
+    { name: 'Cargos', value: charges.length, color: '#3b82f6' },
+    { name: 'Pagos', value: payouts.length, color: '#10b981' },
+  ];
+
   return {
     totalCharges: charges.length,
     totalPayouts: payouts.length,
     totalTransactions: allTransactions.length,
+    totalChargeAmount,
+    totalPayoutAmount,
+    totalProcessedAmount,
+    avgChargeAmount: charges.length ? totalChargeAmount / charges.length : 0,
+    avgPayoutAmount: payouts.length ? totalPayoutAmount / payouts.length : 0,
     kpis: {
       aprobado: counts.aprobado,
       pagado: counts.pagado,
@@ -155,6 +174,7 @@ export async function getPaymentMetrics(): Promise<PaymentMetrics> {
       pendiente: counts.pendiente,
     },
     byStatus,
+    typeBreakdown,
     recentCharges: charges.slice(0, 5),
     recentPayouts: payouts.slice(0, 5),
   };
