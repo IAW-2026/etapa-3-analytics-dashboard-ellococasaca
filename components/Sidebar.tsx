@@ -10,6 +10,7 @@ import {
   CreditCard,
   Truck,
   MessageSquare,
+  ArrowLeft,
   type LucideIcon,
 } from "lucide-react";
 
@@ -31,7 +32,7 @@ const appLinks: NavLink[] = [
   { href: "/feedback", label: "Feedback", icon: MessageSquare },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ adminUrl }: { adminUrl?: string }) {
   const pathname = usePathname();
 
   const isActive = (href: string) =>
@@ -85,7 +86,16 @@ export default function Sidebar() {
         </div>
       </nav>
 
-      <div className="flex items-center gap-3 px-3 pt-6">
+      {adminUrl && (
+        <a
+          href={adminUrl}
+          className="mb-3 flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-400 transition-colors hover:bg-slate-800 hover:text-white"
+        >
+          <ArrowLeft size={16} />
+          Volver al panel
+        </a>
+      )}
+      <div className="flex items-center gap-3 px-3 pt-2">
         <UserButton />
         <p className="text-xs text-slate-500">IAW-2026 - Etapa 3</p>
       </div>
