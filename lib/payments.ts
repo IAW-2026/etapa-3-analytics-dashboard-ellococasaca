@@ -1,3 +1,5 @@
+const PAYMENTS_APP_URL = process.env.PAYMENTS_APP_URL;
+
 export type PaymentStatus =
   | "pendiente"
   | "aprobado"
@@ -109,8 +111,17 @@ export async function getPaymentMetrics(): Promise<PaymentMetrics> {
   let rawCharges: RawCharge[] = [];
   let rawPayouts: RawPayout[] = [];
 
+  if (!PAYMENTS_APP_URL) {
+    throw new Error("Falta la variable de entorno PAYMENTS_APP_URL");
+  }
+
   try {
-    const res = await fetch("https://proyecto-c-payments2-ellococasaca.vercel.app/api/analytics", { cache: "no-store" });
+    const res = await fetch(`${PAYMENTS_APP_URL}/api/analytics`, {
+      cache: "no-store",
+      headers: {
+        "x-inter-service-secret": process.env.INTER_SERVICE_SECRET || "",
+      },
+    });
     if (!res.ok) {
       console.error(`Failed to fetch analytics data: ${res.status}`);
     } else {
