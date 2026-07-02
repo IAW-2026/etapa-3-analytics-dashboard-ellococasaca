@@ -9,7 +9,7 @@ import {
 
 const sections = [
   { href: "/shipping", label: "Shipping", desc: "Envíos y tracking", icon: Truck, live: true },
-  { href: "/buyer", label: "Buyer", desc: "Compradores y pedidos", icon: ShoppingCart, live: false },
+  { href: "/buyer", label: "Buyer", desc: "Compradores y pedidos", icon: ShoppingCart, live: true },
   { href: "/seller", label: "Seller", desc: "Vendedores y catálogo", icon: Store, live: false },
   { href: "/payments", label: "Payments", desc: "Pagos y payouts", icon: CreditCard, live: true },
   { href: "/feedback", label: "Feedback", desc: "Reseñas y calificaciones", icon: MessageSquare, live: true },
