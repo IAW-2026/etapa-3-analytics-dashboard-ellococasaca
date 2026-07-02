@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 
 const FEEDBACK_APP_URL = process.env.FEEDBACK_APP_URL;
+const INTER_SERVICE_SECRET = process.env.INTER_SERVICE_SECRET;
 
 type RawAnalytics = {
   reviews?: {
@@ -80,11 +81,18 @@ export async function getFeedbackMetrics(): Promise<FeedbackMetrics> {
     throw new Error("Falta la variable de entorno FEEDBACK_APP_URL");
   }
 
+  if (!INTER_SERVICE_SECRET) {
+    throw new Error("Falta INTER_SERVICE_SECRET en .env");
+  }
+
   const { getToken } = await auth();
   const token = await getToken();
 
   const res = await fetch(`${FEEDBACK_APP_URL}/api/analytics`, {
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      "x-inter-service-secret": INTER_SERVICE_SECRET,
+    },
     cache: "no-store",
   });
   if (!res.ok) {
