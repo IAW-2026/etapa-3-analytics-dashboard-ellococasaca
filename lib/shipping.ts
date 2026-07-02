@@ -52,7 +52,6 @@ export const STATUS_COLORS: Record<ShipmentStatus, string> = {
   CANCELED: "#ef4444",
 };
 
-
 export const STATUS_BADGE: Record<ShipmentStatus, string> = {
   PENDING: "bg-slate-100 text-slate-600",
   PREPARING: "bg-yellow-100 text-yellow-700",
@@ -64,9 +63,14 @@ export const STATUS_BADGE: Record<ShipmentStatus, string> = {
 
 const API_URL = process.env.SHIPPING_API_URL;
 
+const interServiceHeaders = {
+  "x-inter-service-secret": process.env.INTER_SERVICE_SECRET ?? "",
+};
+
 async function fetchPage(page: number): Promise<ShipmentsResponse> {
   const res = await fetch(`${API_URL}/api/shipments?page=${page}`, {
     next: { revalidate: 30 },
+    headers: interServiceHeaders,
   });
   if (!res.ok) {
     throw new Error(`La API de Shipping respondió ${res.status}`);
